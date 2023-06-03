@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 class ProjectController extends Controller
 {
     public function index() {
-        $projects = Project::with(['type','technologies'])->paginate(6);
+        $projects = Project::with(['type','technologies'])->orderBy('id','desc')->paginate(6);
 
         return response()->json([
             'success' => true,
@@ -19,7 +19,11 @@ class ProjectController extends Controller
 
     public function show($slug) {
 
-        $project = Project::where('slug', $slug)->with(['type', 'technologies'])->first();
+        if($slug == 'last'){
+            $project = Project::orderBy('id','desc')->with(['type', 'technologies'])->first();
+        } else {
+            $project = Project::where('slug', $slug)->with(['type', 'technologies'])->first();
+        }
         
         if($project){
             return response()->json([
@@ -28,8 +32,9 @@ class ProjectController extends Controller
             ]);
         }else{
             return response()->json([
+                'success' => false,
                 'message' => 'Project not found.',
-            ], 400);
+            ], 404);
         }
         
     }
